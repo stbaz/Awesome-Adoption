@@ -1,6 +1,6 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
-import LoadingSpinner from "./LoadingSpinner";
+import LoadingSpinner from "../shared/Spinner";
 import axios from "axios";
 import "./pets.css";
 import {
@@ -11,7 +11,8 @@ import {
   InputGroup,
   Row,
 } from "react-bootstrap";
-import { postcodeValidator } from 'postcode-validator';
+import { postcodeValidator } from "postcode-validator";
+import Placeholder from "./placeholder.jpg"
 
 export default function PetType({ token }) {
   const inputCode = useRef(null);
@@ -20,11 +21,13 @@ export default function PetType({ token }) {
   const [zipCode, setZipCode] = useState(19019);
   const [loading, setLoading] = useState(true);
   let { type } = useParams();
+  console.log('loading: ',loading)
 
   useEffect(() => {
     const config = {
       headers: { Authorization: `Bearer ${token}` },
     };
+
     axios
       .get(
         `https://api.petfinder.com/v2/animals?type=${type}&location=${zipCode}&limit=10&page=1`,
@@ -35,18 +38,42 @@ export default function PetType({ token }) {
         setLoading(false);
       })
       .catch((error) => {
+        setLoading(false);
         console.log(error);
       });
   }, [token, type, zipCode]);
 
   const search = () => {
-    if( postcodeValidator(code, 'US')){
-      setZipCode(code) 
+    if (postcodeValidator(code, "US")) {
+      setZipCode(code);
       setLoading(true);
     } else {
-        inputCode.current.value="Invalid ZipCode"      
-    }    
+      inputCode.current.value = "Invalid ZipCode";
+    }
   };
+
+  const onHoverPhoto = (event) => {
+    const petId = parseInt(event.target.id);
+    const pet = petList.animals.find((pet) => {
+      return pet.id === petId;
+    });
+    if(pet && pet.photos && pet.photos.length > 1) {
+      const randomPhotoIndex = Math.floor(Math.random() * (pet.photos.length - 1) + 1);
+      event.target.src = pet.photos[randomPhotoIndex].medium;
+    }
+  }
+
+  const onBlurPhoto = (event) => {
+    const petId = parseInt(event.target.id);
+    const pet = petList.animals.find((pet) => {
+      return pet.id === petId;
+    });
+
+    if(pet && pet.photos && pet.photos.length > 1) {
+      event.target.src = pet.photos[0].medium;
+    }
+  }
+
   return (
     <div className="petList__container">
       <h1>List Of {type} Buddies</h1>
@@ -69,6 +96,7 @@ export default function PetType({ token }) {
         />
         <Button onClick={search}>GO</Button>
       </InputGroup>
+
       <Row>
         {loading ? (
           <LoadingSpinner />
@@ -77,13 +105,13 @@ export default function PetType({ token }) {
           petList.animals.map((pet) => {
             const img =
               pet.photos === undefined || pet.photos.length === 0
-                ? "https://via.placeholder.com/300"
+                ? "placeholder"
                 : pet.photos[0].medium;
             // array empty or does not exist
             return (
               <Col md={4} xs={12} key={pet.id} className="petList__column">
                 <Card style={{ width: "100%" }}>
-                  <Card.Img variant="top" src={img} />
+                  { img === "placeholder" ? <Card.Img id={pet.id} variant="top" src={Placeholder} onMouseEnter={onHoverPhoto} onMouseLeave={onBlurPhoto} /> : <Card.Img id={pet.id} variant="top" src={img} onMouseEnter={onHoverPhoto} onMouseLeave={onBlurPhoto} /> }
                   <Card.Body>
                     <Card.Title>{pet.name}</Card.Title>
                     <Card.Text> Breed: {pet.breeds.primary}</Card.Text>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
 
 const PetTypes = ({ types }) => {
   const listedPets = ["Dog", "Cat", "Bird", "Horse", "Rabbit"];
@@ -21,24 +21,46 @@ const PetTypes = ({ types }) => {
     </>
   );
 };
-
+const petList = {
+  types: [
+    {
+      name: "Dog",
+    },
+    {
+      name: "Cat",
+    },
+    {
+      name: "Rabbit",
+    },
+    {
+      name: "Horse",
+    },
+    {
+      name: "Bird",
+    },
+  ],
+};
 export default function NavigationBar({ token }) {
   const [types, setTypes] = useState([]);
   useEffect(() => {
-    const config = {
-      headers: { Authorization: `Bearer ${token}` },
-    };
-    const getTypes = async () => {
-      axios
-        .get("https://api.petfinder.com/v2/types", config)
-        .then(({ data }) => data && setTypes(data.types));
+    // const config = {
+    //   headers: { Authorization: `Bearer ${token}` },
+    // };
+    const getTypes = () => {
+      // axios
+      //   .get("https://api.petfinder.com/v2/types", config)
+      //   .then(({ data }) => data && setTypes(data.types))
+      //   .catch((error) => {
+      //     console.log(error);
+      //   });
+      setTypes(petList.types);
     };
     getTypes();
   }, [token]);
 
   return (
-    <Navbar bg="primary" expand="lg">
-      <Navbar.Brand href="#home">PawHub</Navbar.Brand>
+    <Navbar bg="primary" expand="lg" style={{ minHeight: "fit-content" }}>
+      <Navbar.Brand href="/">PawHub</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
